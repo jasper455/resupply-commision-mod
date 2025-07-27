@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "resupply:block/resupply_terminal"
+    }
+  }
+}

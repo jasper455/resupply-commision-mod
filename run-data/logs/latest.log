@@ -1,0 +1,33 @@
+[26Jul2025 17:54:20.655] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgedatauserdev, --assetIndex, 5, --assetsDir, C:\Users\ahkin\.gradle\caches\forge_gradle\assets, --gameDir, ., --fml.forgeVersion, 47.4.4, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --mod, resupply, --all, --output, C:\Users\ahkin\sandbox\resupply-commision-mod\src\generated\resources, --existing, C:\Users\ahkin\sandbox\resupply-commision-mod\src\main\resources]
+[26Jul2025 17:54:20.661] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.15 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
+[26Jul2025 17:54:20.908] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgedatauserdev
+[26Jul2025 17:54:20.996] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/ahkin/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23128!/ Service=ModLauncher Env=CLIENT
+[26Jul2025 17:54:21.362] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\ahkin\.gradle\caches\modules-2\files-2.1\net.minecraftforge\javafmllanguage\1.20.1-47.4.4\c05c04093d241dea1d0f54782d19cfe5db9d0aac\javafmllanguage-1.20.1-47.4.4.jar is missing mods.toml file
+[26Jul2025 17:54:21.365] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\ahkin\.gradle\caches\modules-2\files-2.1\net.minecraftforge\lowcodelanguage\1.20.1-47.4.4\8a8bd6d44f3f0e6a1145b9066eac84fdcfbe7108\lowcodelanguage-1.20.1-47.4.4.jar is missing mods.toml file
+[26Jul2025 17:54:21.368] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\ahkin\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mclanguage\1.20.1-47.4.4\a8876f0a1a04237fc48a4a73692ea08e0443d2ba\mclanguage-1.20.1-47.4.4.jar is missing mods.toml file
+[26Jul2025 17:54:21.371] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\ahkin\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlcore\1.20.1-47.4.4\55a693260a8a7b851c3531972ef997294c191b3e\fmlcore-1.20.1-47.4.4.jar is missing mods.toml file
+[26Jul2025 17:54:21.504] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+[26Jul2025 17:54:23.181] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgedatauserdev' with arguments [--gameDir, ., --assetsDir, C:\Users\ahkin\.gradle\caches\forge_gradle\assets, --assetIndex, 5, --mod, resupply, --all, --output, C:\Users\ahkin\sandbox\resupply-commision-mod\src\generated\resources, --existing, C:\Users\ahkin\sandbox\resupply-commision-mod\src\main\resources]
+[26Jul2025 17:54:23.733] [main/INFO] [net.minecraftforge.data.loading.DatagenModLoader/]: Initializing Data Gatherer for mods [resupply]
+[26Jul2025 17:54:32.596] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.4, for MC 1.20.1 with MCP 20230612.114412
+[26Jul2025 17:54:32.597] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: MinecraftForge v47.4.4 Initialized
+[26Jul2025 17:54:33.353] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/ahkin/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.4_mapped_official_1.20.1/forge-1.20.1-47.4.4_mapped_official_1.20.1-recomp.jar%23191!/assets/.mcassetsroot' uses unexpected schema
+[26Jul2025 17:54:33.353] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/ahkin/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.4_mapped_official_1.20.1/forge-1.20.1-47.4.4_mapped_official_1.20.1-recomp.jar%23191!/data/.mcassetsroot' uses unexpected schema
+[26Jul2025 17:54:33.715] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Recipes
+[26Jul2025 17:54:33.721] [main/INFO] [net.minecraft.data.DataGenerator/]: Recipes finished after 4 ms
+[26Jul2025 17:54:33.721] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Loot Tables
+[26Jul2025 17:54:33.807] [main/INFO] [net.minecraft.data.DataGenerator/]: Loot Tables finished after 85 ms
+[26Jul2025 17:54:33.807] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Block Tags
+[26Jul2025 17:54:33.839] [main/INFO] [net.minecraft.data.DataGenerator/]: Block Tags finished after 31 ms
+[26Jul2025 17:54:33.839] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Tags for minecraft:fluid mod id resupply
+[26Jul2025 17:54:33.857] [main/INFO] [net.minecraft.data.DataGenerator/]: Tags for minecraft:fluid mod id resupply finished after 17 ms
+[26Jul2025 17:54:33.857] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Item Models: resupply
+[26Jul2025 17:54:33.869] [main/INFO] [net.minecraft.data.DataGenerator/]: Item Models: resupply finished after 12 ms
+[26Jul2025 17:54:33.869] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Item Tags
+[26Jul2025 17:54:33.871] [main/INFO] [net.minecraft.data.DataGenerator/]: Item Tags finished after 1 ms
+[26Jul2025 17:54:33.871] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Block States: resupply
+[26Jul2025 17:54:34.033] [main/INFO] [net.minecraft.data.DataGenerator/]: Block States: resupply finished after 161 ms
+[26Jul2025 17:54:34.034] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Datapack Entries
+[26Jul2025 17:54:34.039] [main/INFO] [net.minecraft.data.DataGenerator/]: Datapack Entries finished after 5 ms
+[26Jul2025 17:54:34.040] [main/INFO] [net.minecraft.data.DataGenerator/]: All providers took: 325 ms
+[26Jul2025 17:54:34.056] [main/INFO] [net.minecraft.data.HashCache/]: Caching: total files: 7, old count: 7, new count: 8, removed stale: 0, written: 0
