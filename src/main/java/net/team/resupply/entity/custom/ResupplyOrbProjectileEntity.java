@@ -116,17 +116,18 @@ public class ResupplyOrbProjectileEntity extends AbstractArrow {
         // Resupply Entity Stuff
         if (getStratagemType().equals("Resupply") && !this.level().isClientSide) {
             if (groundedTicks == 300) {
-//                SupportHellpodEntity supportHellpodEntity = new SupportHellpodEntity(this.level(), getStratagemType());
-//                supportHellpodEntity.setPos(this.getX(), 200, this.getZ());
-//                this.level().addFreshEntity(supportHellpodEntity);
+                ResupplyPodEntity supportHellpodEntity = new ResupplyPodEntity(this.level(), getStratagemType());
+                supportHellpodEntity.setPos(this.getX(), 200, this.getZ());
+                supportHellpodEntity.getPersistentData().put("StoredItem", this.getPersistentData().getCompound("StoredItem"));
+                this.level().addFreshEntity(supportHellpodEntity);
 //
 //                // Get the owner (player)
                 if (this.getOwner() instanceof Player player) {
 //                    // Set the entity's rotation to face the player
-//                    double deltaX = player.getX() - this.getBlockX();
-//                    double deltaZ = player.getZ() - this.getBlockZ();
-//                    float yRot = (float) (Math.atan2(deltaZ, deltaX) * (180.0D / Math.PI)) - 90.0F;
-//                    supportHellpodEntity.setYRot(yRot);
+                    double deltaX = player.getX() - this.getBlockX();
+                    double deltaZ = player.getZ() - this.getBlockZ();
+                    float yRot = (float) (Math.atan2(deltaZ, deltaX) * (180.0D / Math.PI)) - 90.0F;
+                    supportHellpodEntity.setYRot(yRot);
                 }
             }
         }

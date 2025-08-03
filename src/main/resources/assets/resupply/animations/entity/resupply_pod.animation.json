@@ -1,0 +1,78 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"land": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"bone": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, -90, 0]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, -32, 0]
+						}
+					}
+				}
+			}
+		},
+		"fall": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"bone": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [0, -180, 0],
+						"1.0": [0, -360, 0]
+					}
+				},
+				"container": {
+					"position": [0, -12, 0]
+				}
+			}
+		},
+		"deploy": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"bone": {
+					"rotation": [0, -90, 0],
+					"position": [0, -32, 0]
+				},
+				"container": {
+					"position": {
+						"0.0": [0, -12, 0],
+						"0.25": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"empty": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"bone": {
+					"rotation": [0, -90, 0],
+					"position": [0, -32, 0]
+				},
+				"container": {
+					"position": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, -12, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

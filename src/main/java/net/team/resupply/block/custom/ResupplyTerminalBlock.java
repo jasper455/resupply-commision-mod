@@ -45,7 +45,7 @@ public class ResupplyTerminalBlock extends BaseEntityBlock {
                                 // Write the slot item tag to the held item
                                 stack.getOrCreateTag().put("StoredItem", slotItemTag);
                                 // Optional: feedback
-                                pPlayer.displayClientMessage(Component.literal("Stored item data!"), true);
+                                pPlayer.displayClientMessage(Component.literal("Stored Block data!"), true);
                             }
                             return InteractionResult.SUCCESS;
                         }
