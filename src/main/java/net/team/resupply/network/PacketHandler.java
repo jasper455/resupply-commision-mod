@@ -23,6 +23,11 @@ public class PacketHandler {
                 .decoder(STeleportPlayerPacket::new)
                 .consumerMainThread(STeleportPlayerPacket::handle)
                 .add();
+        INSTANCE.messageBuilder(SResupplyPodDestroyBlocksPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SResupplyPodDestroyBlocksPacket::encode)
+                .decoder(SResupplyPodDestroyBlocksPacket::new)
+                .consumerMainThread(SResupplyPodDestroyBlocksPacket::handle)
+                .add();
     }
 
     public static void sendToServer(Object msg) {

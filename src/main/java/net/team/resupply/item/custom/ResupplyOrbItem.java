@@ -34,9 +34,16 @@ public class ResupplyOrbItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
-        ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
-        pPlayer.startUsingItem(pUsedHand);
-        return InteractionResultHolder.consume(itemstack);
+        ItemStack stack = pPlayer.getItemInHand(pUsedHand);
+        if (!pLevel.isClientSide() && stack.hasTag() && stack.getTag().contains("StoredEntity") && stack.getTag().contains("StoredEntityId")) {
+            pPlayer.startUsingItem(pUsedHand);
+            return InteractionResultHolder.consume(stack);
+        }
+        if (!pLevel.isClientSide() && stack.hasTag() && stack.getTag().contains("StoredItem")) {
+            pPlayer.startUsingItem(pUsedHand);
+            return InteractionResultHolder.consume(stack);
+        }
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override

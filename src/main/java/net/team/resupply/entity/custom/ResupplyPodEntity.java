@@ -1,6 +1,5 @@
 package net.team.resupply.entity.custom;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -8,31 +7,26 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.team.resupply.entity.ModEntities;
 import net.team.resupply.network.PacketHandler;
+import net.team.resupply.network.SResupplyPodDestroyBlocksPacket;
 import net.team.resupply.network.STeleportPlayerPacket;
 import net.team.resupply.screen.custom.ResupplyPodMenu;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -44,7 +38,6 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,10 +114,12 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
         if (this.isGrounded()) {
             groundedTicks++;
-            if (groundedTicks == 20) {
-                if (!this.level().isClientSide && this.getPersistentData().contains("StoredEntity")) {
-                    CompoundTag entityData = this.getPersistentData().getCompound("StoredEntity");
-                    if (!entityData.contains("UUID")) {
+        }
+//        if (this.tickCount == 5) {
+            if (!this.level().isClientSide && this.getPersistentData().contains("StoredEntity")) {
+                CompoundTag entityData = this.getPersistentData().getCompound("StoredEntity");
+                if (!entityData.contains("UUID")) {
+                    if (this.tickCount == 5) {
                         if (entityData.contains("id", Tag.TAG_STRING)) {
                             String entityId = entityData.getString("id");
                             EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityId));
@@ -140,19 +135,23 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
                                     entity.load(copy);
                                     entity.setPos(this.getX(), this.getY() + 1, this.getZ());
                                     this.level().addFreshEntity(entity);
+                                    entity.startRiding(this);
                                 }
                             }
                         }
-                    } else {
+                    }
+                } else {
+                    if (this.tickCount == 5) {
                         PacketHandler.sendToServer(new STeleportPlayerPacket(entityData.getUUID("UUID"),
                                 this.level().dimension().location(), this.getX(), this.getY(), this.getZ()));
                     }
-
+                    this.level().getPlayerByUUID(entityData.getUUID("UUID")).startRiding(this);
                 }
+
             }
-            if (groundedTicks >= 80 && this.getPersistentData().contains("StoredEntity")) {
-                this.discard();
-            }
+//        }
+        if (groundedTicks >= 80 && this.getPersistentData().contains("StoredEntity")) {
+            this.discard();
         }
         if (this.isGrounded() && !hasBeenSet) {
             this.setPos(this.getX(), this.getY(), this.getZ());
@@ -168,14 +167,18 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
         if (!this.isGrounded()) {
             this.level().getEntitiesOfClass(LivingEntity.class, new AABB(this.getOnPos()).inflate(1.0)).forEach(entity -> {
-                entity.hurt(level().damageSources().explosion(null), 12000);
+                if (!this.getPassengers().isEmpty() && !this.getFirstPassenger().is(entity)) {
+                    entity.hurt(level().damageSources().explosion(null), 12000);
+                }
             });
             BlockPos pos = new BlockPos((int) this.getX(), (int) (this.getY() - 5), (int) this.getZ());
             if (!this.level().isClientSide()) {
                 ((ServerLevel) this.level()).sendParticles(ParticleTypes.FLAME, this.getX(), this.getY(), this.getZ(),
                         5, 0f, 0f, 0f, 0.25f);
             }
-//            PacketHandler.sendToServer(new SHellpodDestroyBlocksPacket(pos, 2));
+            if (this.level().isClientSide()) {
+                PacketHandler.sendToServer(new SResupplyPodDestroyBlocksPacket(pos, 2));
+            }
         }
         if (this.isGrounded() && groundedTicks <= 10 && !this.level().isClientSide()) {
             ((ServerLevel) this.level()).sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, this.getX(), this.getY(), this.getZ(),
@@ -343,6 +346,16 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
     public int getGroundedTicks() {
         return groundedTicks;
+    }
+
+    @Override
+    public boolean canRiderInteract() {
+        return false;
+    }
+
+    @Override
+    public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider) {
+        return true;
     }
 
     @Override

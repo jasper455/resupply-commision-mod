@@ -90,18 +90,18 @@ public class ResupplyEntityOrbItem extends Item {
 
         CompoundTag tag = stack.getOrCreateTag();
 
-        // Check if the item already has stored entity data
-        if (tag.contains("StoredEntity") || tag.contains("StoredEntityId")) {
-            if (!level.isClientSide()) {
-                player.displayClientMessage(Component.literal("This capsule already contains an entity!"), true);
-            }
-            event.setCancellationResult(InteractionResult.FAIL);
-            event.setCanceled(true);
-            return;
-        }
 
         // Only proceed with your custom item
         if (stack.getItem() == ModItems.RESUPPLY_ENTITY_ORB.get()) {
+            // Check if the item already has stored entity data
+            if (tag.contains("StoredEntity") || tag.contains("StoredEntityId")) {
+                if (!level.isClientSide()) {
+                    player.displayClientMessage(Component.literal("This capsule already contains an entity!"), true);
+                }
+                event.setCancellationResult(InteractionResult.FAIL);
+                event.setCanceled(true);
+                return;
+            }
             Entity target = event.getTarget();
             if (target instanceof Player) {
                 return;
