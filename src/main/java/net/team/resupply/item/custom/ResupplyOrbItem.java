@@ -5,6 +5,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -12,11 +13,13 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.team.resupply.entity.custom.ResupplyOrbProjectileEntity;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,16 +46,25 @@ public class ResupplyOrbItem extends Item {
             if (!pLevel.isClientSide() && stack.hasTag() && stack.getTag().contains("StoredItem")) {
                 CompoundTag storedItemTag = stack.getTag().getCompound("StoredItem");
 
-                // Load ItemStack from tag
-                ItemStack reconstructed = ItemStack.of(storedItemTag);
-                int randomInt = Mth.randomBetweenInclusive(RandomSource.create(), 1, 27);
-                player.getInventory().add(getItemStacksFromContainerItem(reconstructed).get(randomInt));
-
                 ResupplyOrbProjectileEntity resupplyOrb = new ResupplyOrbProjectileEntity(player, pLevel,
                         "Resupply", player.getDirection());
                 float power = Math.min(i / 20F, 1.5F); // Max power after 1 second charge
                 resupplyOrb.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, power * 1.5F, 0F);
                 resupplyOrb.getPersistentData().put("StoredItem", storedItemTag);
+
+                pLevel.addFreshEntity(resupplyOrb);
+            }
+
+            if (!pLevel.isClientSide() && stack.hasTag() && stack.getTag().contains("StoredEntity") && stack.getTag().contains("StoredEntityId")) {
+                CompoundTag storedEntityTag = stack.getTag().getCompound("StoredEntity");
+                CompoundTag storedEntityId = stack.getTag().getCompound("StoredEntityId");
+
+                ResupplyOrbProjectileEntity resupplyOrb = new ResupplyOrbProjectileEntity(player, pLevel,
+                        "Resupply", player.getDirection());
+                float power = Math.min(i / 20F, 1.5F); // Max power after 1 second charge
+                resupplyOrb.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, power * 1.5F, 0F);
+                resupplyOrb.getPersistentData().put("StoredEntity", storedEntityTag);
+                resupplyOrb.getPersistentData().put("StoredEntityId", storedEntityId);
 
                 pLevel.addFreshEntity(resupplyOrb);
 
@@ -74,28 +86,6 @@ public class ResupplyOrbItem extends Item {
         return 72000;
     }
 
-    public static List<ItemStack> getItemStacksFromContainerItem(ItemStack containerItem) {
-        List<ItemStack> items = new ArrayList<>();
-
-        if (containerItem.hasTag()) {
-            CompoundTag tag = containerItem.getTag();
-
-            // Shulker boxes, chests, etc. store items under BlockEntityTag.Items
-            if (tag.contains("BlockEntityTag", Tag.TAG_COMPOUND)) {
-                CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
-
-                if (blockEntityTag.contains("Items", Tag.TAG_LIST)) {
-                    // Reconstruct the item list
-                    items = NonNullList.withSize(27, ItemStack.EMPTY); // 27 for shulker box, or dynamic size
-
-                    ContainerHelper.loadAllItems(blockEntityTag, (NonNullList<ItemStack>) items);
-                }
-            }
-        }
-
-        return items;
-    }
-
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
@@ -111,5 +101,35 @@ public class ResupplyOrbItem extends Item {
             }
         }
 
+        if (stack.hasTag() && stack.getTag().contains("StoredEntity") && stack.getTag().contains("StoredEntityId")) {
+            CompoundTag entityTag = stack.getTag().getCompound("StoredEntity");
+            String entityId = stack.getTag().getString("StoredEntityId");
+
+            // Get EntityType from registry
+            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityId));
+            if (type != null && level != null) {
+                try {
+                    // Create a temporary entity to get its display name
+                    Entity entity = type.create(level);
+                    if (entity != null) {
+                        entity.load(entityTag);
+                        tooltipComponents.add(Component.literal("§eStored Entity Data: ").append(entity.getDisplayName()));
+                        return;
+                    }
+                } catch (Exception ignored) {
+                    // Handle edge case: corrupt or invalid NBT
+                }
+            }
+
+            if (entityTag.contains("UUID")) {
+                if (level != null) {
+                    tooltipComponents.add(Component.literal("§eStored Player Data: " + level.getPlayerByUUID(entityTag.getUUID("UUID")).getName().getString()));
+                }
+            } else {
+                // Fallback if entity can't be created
+                tooltipComponents.add(Component.literal("§eStored Entity Data: " + entityId));
+            }
+
+        }
     }
 }

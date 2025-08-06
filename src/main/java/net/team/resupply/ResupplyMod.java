@@ -18,9 +18,9 @@ import net.team.resupply.block.ModBlocks;
 import net.team.resupply.block.entity.ModBlockEntities;
 import net.team.resupply.entity.ModEntities;
 import net.team.resupply.entity.client.ResupplyOrbProjectileRenderer;
-import net.team.resupply.entity.custom.ResupplyOrbProjectileEntity;
 import net.team.resupply.item.ModItems;
 import net.team.resupply.screen.ModMenuTypes;
+import net.team.resupply.screen.custom.ResupplyPodScreen;
 import net.team.resupply.screen.custom.ResupplyTerminalScreen;
 import org.slf4j.Logger;
 
@@ -73,6 +73,7 @@ public class ResupplyMod
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             MenuScreens.register(ModMenuTypes.RESUPPLY_TERMINAL_MENU.get(), ResupplyTerminalScreen::new);
+            MenuScreens.register(ModMenuTypes.RESUPPLY_POD_MENU.get(), ResupplyPodScreen::new);
         }
     }
 }

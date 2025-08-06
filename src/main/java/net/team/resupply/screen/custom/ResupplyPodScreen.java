@@ -9,11 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.team.resupply.ResupplyMod;
 
-public class ResupplyTerminalScreen extends AbstractContainerScreen<ResupplyTerminalMenu> {
+public class ResupplyPodScreen extends AbstractContainerScreen<ResupplyPodMenu> {
     private static final ResourceLocation GUI_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(ResupplyMod.MOD_ID, "textures/gui/resupply_terminal_gui.png");
+            ResourceLocation.fromNamespaceAndPath(ResupplyMod.MOD_ID, "textures/gui/resupply_pod_gui.png");
 
-    public ResupplyTerminalScreen(ResupplyTerminalMenu menu, Inventory inventory, Component title) {
+    public ResupplyPodScreen(ResupplyPodMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
 //        this.inventoryLabelX = 1000;
 //        this.inventoryLabelY = 1000;

@@ -8,6 +8,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.team.resupply.ResupplyMod;
 import net.team.resupply.entity.client.ModModelLayers;
 import net.team.resupply.entity.client.ResupplyOrbProjectileModel;
+import net.team.resupply.network.PacketHandler;
 
 
 @Mod.EventBusSubscriber(modid = ResupplyMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -23,10 +24,10 @@ public class ModEventBusEvents {
 //        event.put(ModEntities.ORBITAL_LASER.get(), OrbitalLaserEntity.createAttributes().build());
 //    }
 //
-//    @SubscribeEvent
-//    public static void commonSetup(FMLCommonSetupEvent event) {
-//        event.enqueueWork(() -> {
-//            PacketHandler.register();
-//        });
-//    }
+    @SubscribeEvent
+    public static void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            PacketHandler.register();
+        });
+    }
 }

@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -29,7 +30,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.team.resupply.entity.ModEntities;
+import net.team.resupply.network.PacketHandler;
+import net.team.resupply.network.STeleportPlayerPacket;
+import net.team.resupply.screen.custom.ResupplyPodMenu;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -45,7 +50,6 @@ import java.util.List;
 
 
 public class ResupplyPodEntity extends Entity implements GeoEntity {
-
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public static final RawAnimation DEPLOY = RawAnimation.begin().thenPlayAndHold("deploy");
@@ -65,13 +69,13 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
     public ResupplyPodEntity(EntityType<? extends Entity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.inventory = new SimpleContainer(2); // Initialize with 2 slots
+        this.inventory = new SimpleContainer(27); // Initialize with 27 slots
         initializeInventory();
     }
 
     public ResupplyPodEntity(Level level, String stratagemType) {
         super(ModEntities.RESUPPLY_POD.get(), level);
-        this.inventory = new SimpleContainer(2); // Initialize with 2 slots
+        this.inventory = new SimpleContainer(27); // Initialize with 27 slots
         this.stratagemType = stratagemType;
         initializeInventory();
     }
@@ -94,22 +98,16 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
         if (onSolidBlock && this.getDeltaMovement().y <= 0) {
             if (!hasLanded) {
+                if (this.inventory.isEmpty() && !hasLanded) {
+                    List<ItemStack> stacks = getItemStacksFromContainerItem();
+                    for (int i = 0; i < stacks.size(); i++) {
+                        inventory.setItem(i, stacks.get(i));
+                    }
+                }
                 hasLanded = true;
                 // Play landing sound if needed
                 this.playSound(SoundEvents.DRAGON_FIREBALL_EXPLODE, 1.0F, 1.0F);
                 this.setDeltaMovement(Vec3.ZERO);
-                if (!this.level().isClientSide()) {
-                    for (int i = 0; i < getItemStacksFromContainerItem().size(); i++) {
-                        ItemEntity itemEntity = new ItemEntity(
-                                level(),
-                                this.blockPosition().getX() + 0.5,
-                                this.blockPosition().getY() + 1,
-                                this.blockPosition().getZ() + 0.5,
-                                getItemStacksFromContainerItem().get(i)
-                        );
-                        this.level().addFreshEntity(itemEntity);
-                    }
-                }
             }
             groundedTicks++;
         }
@@ -123,6 +121,38 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
         if (this.isGrounded()) {
             groundedTicks++;
+            if (groundedTicks == 20) {
+                if (!this.level().isClientSide && this.getPersistentData().contains("StoredEntity")) {
+                    CompoundTag entityData = this.getPersistentData().getCompound("StoredEntity");
+                    if (!entityData.contains("UUID")) {
+                        if (entityData.contains("id", Tag.TAG_STRING)) {
+                            String entityId = entityData.getString("id");
+                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityId));
+
+                            if (type != null) {
+                                Entity entity = type.create(this.level());
+
+                                if (entity != null) {
+                                    // load() expects the NBT to NOT contain the "id" field
+                                    CompoundTag copy = entityData.copy();
+                                    copy.remove("id");
+
+                                    entity.load(copy);
+                                    entity.setPos(this.getX(), this.getY() + 1, this.getZ());
+                                    this.level().addFreshEntity(entity);
+                                }
+                            }
+                        }
+                    } else {
+                        PacketHandler.sendToServer(new STeleportPlayerPacket(entityData.getUUID("UUID"),
+                                this.level().dimension().location(), this.getX(), this.getY(), this.getZ()));
+                    }
+
+                }
+            }
+            if (groundedTicks >= 80 && this.getPersistentData().contains("StoredEntity")) {
+                this.discard();
+            }
         }
         if (this.isGrounded() && !hasBeenSet) {
             this.setPos(this.getX(), this.getY(), this.getZ());
@@ -138,9 +168,13 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
         if (!this.isGrounded()) {
             this.level().getEntitiesOfClass(LivingEntity.class, new AABB(this.getOnPos()).inflate(1.0)).forEach(entity -> {
-                entity.hurt(level().damageSources().explosion(null), 9999.0F);
+                entity.hurt(level().damageSources().explosion(null), 12000);
             });
             BlockPos pos = new BlockPos((int) this.getX(), (int) (this.getY() - 5), (int) this.getZ());
+            if (!this.level().isClientSide()) {
+                ((ServerLevel) this.level()).sendParticles(ParticleTypes.FLAME, this.getX(), this.getY(), this.getZ(),
+                        5, 0f, 0f, 0f, 0.25f);
+            }
 //            PacketHandler.sendToServer(new SHellpodDestroyBlocksPacket(pos, 2));
         }
         if (this.isGrounded() && groundedTicks <= 10 && !this.level().isClientSide()) {
@@ -150,34 +184,34 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
         super.tick();
     }
 
-//    @Override
-//    public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
-//        if (!this.level().isClientSide && this.isGrounded()) {
-//            if (pPlayer instanceof ServerPlayer serverPlayer) {
-//                NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
-//                    @Override
-//                    public Component getDisplayName() {
-//                        return Component.literal("Support Hellpod");
-//                    }
-//
-//                    @Override
-//                    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-//                        return new SupportHellpodMenu(pContainerId, pPlayerInventory, inventory, ResupplyPodEntity.this);
-//                    }
-//                }, buffer -> buffer.writeInt(getId()));
-//            }
-//            return InteractionResult.CONSUME;
-//        }
-//
-//        return InteractionResult.SUCCESS;
-//    }
+    @Override
+    public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
+        if (!this.level().isClientSide && this.isGrounded() && !this.inventory.isEmpty() && !stratagemType.equals("Entity")) {
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
+                NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
+                    @Override
+                    public Component getDisplayName() {
+                        return Component.literal("Resupply Pod");
+                    }
+
+                    @Override
+                    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
+                        return new ResupplyPodMenu(pContainerId, pPlayerInventory, inventory, ResupplyPodEntity.this);
+                    }
+                }, buffer -> buffer.writeInt(getId()));
+            }
+            return InteractionResult.CONSUME;
+        }
+
+        return InteractionResult.SUCCESS;
+    }
 
     private PlayState animations(AnimationState event) {
-        if (isGrounded() && groundedTicks >= 20 && hasBeenClicked) {
+        if (isGrounded() && groundedTicks >= 20 && hasBeenClicked && !this.getPersistentData().contains("StoredEntity")) {
             event.getController().setAnimation(EMPTY);
             return PlayState.CONTINUE;
         }
-        if (isGrounded() && groundedTicks >= 20) {
+        if (isGrounded() && groundedTicks >= 20 && !this.getPersistentData().contains("StoredEntity")) {
             event.getController().setAnimation(DEPLOY);
             return PlayState.CONTINUE;
         }
@@ -203,7 +237,7 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
 
     @Override
     public boolean canBeCollidedWith() {
-        return !hasBeenClicked;  // Allow the entity to be collided with, enabling interaction
+        return !hasBeenClicked && !this.getPersistentData().contains("StoredEntity");  // Allow the entity to be collided with, enabling interaction
     }
 
     @Override
@@ -233,6 +267,12 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
             int slot = itemTag.getInt("Slot");
             if (slot >= 0 && slot < inventory.getContainerSize()) {
                 inventory.setItem(slot, ItemStack.of(itemTag));
+            }
+        }
+        if (this.inventory.isEmpty()) {
+            List<ItemStack> stacks = getItemStacksFromContainerItem();
+            for (int i = 0; i < stacks.size(); i++) {
+                inventory.setItem(i, stacks.get(i));
             }
         }
     }
@@ -279,14 +319,22 @@ public class ResupplyPodEntity extends Entity implements GeoEntity {
     }
 
     private void initializeInventory() {
-        if (stratagemType.equals("")) {
-            this.inventory.setItem(0, new ItemStack(Items.AIR));
-            this.inventory.setItem(1, new ItemStack(Items.AIR));
+        List<ItemStack> itemStackList = getItemStacksFromContainerItem();
+        for (int i = 0; i < itemStackList.size(); i++) {
+            this.inventory.setItem(i, itemStackList.get(i));
         }
-        if (stratagemType.equals("Resupply")) {
-//            this.inventory.setItem(0, new ItemStack(ModBlocks.AMMO_CRATE.get(), 2));
-//            this.inventory.setItem(1, new ItemStack(ModBlocks.AMMO_CRATE.get(), 2));
-        }
+//        if (!this.level().isClientSide()) {
+//            for (int i = 0; i < getItemStacksFromContainerItem().size(); i++) {
+//                ItemEntity itemEntity = new ItemEntity(
+//                        level(),
+//                        this.blockPosition().getX() + 0.5,
+//                        this.blockPosition().getY() + 1,
+//                        this.blockPosition().getZ() + 0.5,
+//                        getItemStacksFromContainerItem().get(i)
+//                );
+//                this.level().addFreshEntity(itemEntity);
+//            }
+//        }
     }
 
     public void onInventoryClosed() {

@@ -1,5 +1,6 @@
 package net.team.resupply.entity.custom;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -90,17 +91,6 @@ public class ResupplyOrbProjectileEntity extends AbstractArrow {
 
         if (getStratagemType() == null) this.discard();
 
-//        this.getOwner().sendSystemMessage(Component.literal(String.valueOf(getItemStacksFromContainerItem())));
-        for (int i = 0; i < getItemStacksFromContainerItem().size(); i++) {
-            ItemEntity itemEntity = new ItemEntity(
-                    level(),
-                    pResult.getBlockPos().getX() + 0.5,
-                    pResult.getBlockPos().getY() + 1,
-                    pResult.getBlockPos().getZ() + 0.5,
-                    getItemStacksFromContainerItem().get(i)
-            );
-            this.level().addFreshEntity(itemEntity);
-        }
     }
 
     @Override
@@ -116,18 +106,40 @@ public class ResupplyOrbProjectileEntity extends AbstractArrow {
         // Resupply Entity Stuff
         if (getStratagemType().equals("Resupply") && !this.level().isClientSide) {
             if (groundedTicks == 300) {
-                ResupplyPodEntity supportHellpodEntity = new ResupplyPodEntity(this.level(), getStratagemType());
-                supportHellpodEntity.setPos(this.getX(), 200, this.getZ());
-                supportHellpodEntity.getPersistentData().put("StoredItem", this.getPersistentData().getCompound("StoredItem"));
-                this.level().addFreshEntity(supportHellpodEntity);
-//
-//                // Get the owner (player)
-                if (this.getOwner() instanceof Player player) {
-//                    // Set the entity's rotation to face the player
-                    double deltaX = player.getX() - this.getBlockX();
-                    double deltaZ = player.getZ() - this.getBlockZ();
-                    float yRot = (float) (Math.atan2(deltaZ, deltaX) * (180.0D / Math.PI)) - 90.0F;
-                    supportHellpodEntity.setYRot(yRot);
+                if (this.getPersistentData().contains("StoredItem")) {
+                    ResupplyPodEntity resupplyPodEntity = new ResupplyPodEntity(this.level(), "Resupply");
+                    resupplyPodEntity.setPos(this.getX(), 200, this.getZ());
+                    
+                    resupplyPodEntity.getPersistentData().put("StoredItem", this.getPersistentData().getCompound("StoredItem"));
+
+                    this.level().addFreshEntity(resupplyPodEntity);
+
+                    // Get the owner (player)
+                    if (this.getOwner() instanceof Player player) {
+                        // Set the entity's rotation to face the player
+                        double deltaX = player.getX() - this.getBlockX();
+                        double deltaZ = player.getZ() - this.getBlockZ();
+                        float yRot = (float) (Math.atan2(deltaZ, deltaX) * (180.0D / Math.PI)) - 90.0F;
+                        resupplyPodEntity.setYRot(yRot);
+                    }
+                }
+                if (this.getPersistentData().contains("StoredEntity") && this.getPersistentData().contains("StoredEntityId")) {
+                    ResupplyPodEntity resupplyPodEntity = new ResupplyPodEntity(this.level(), "Entity");
+                    resupplyPodEntity.setPos(this.getX(), 200, this.getZ());
+
+                    resupplyPodEntity.getPersistentData().put("StoredEntity", this.getPersistentData().getCompound("StoredEntity"));
+                    resupplyPodEntity.getPersistentData().put("StoredEntityId", this.getPersistentData().getCompound("StoredEntityId"));
+
+                    this.level().addFreshEntity(resupplyPodEntity);
+
+                    // Get the owner (player)
+                    if (this.getOwner() instanceof Player player) {
+                        // Set the entity's rotation to face the player
+                        double deltaX = player.getX() - this.getBlockX();
+                        double deltaZ = player.getZ() - this.getBlockZ();
+                        float yRot = (float) (Math.atan2(deltaZ, deltaX) * (180.0D / Math.PI)) - 90.0F;
+                        resupplyPodEntity.setYRot(yRot);
+                    }
                 }
             }
         }

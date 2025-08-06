@@ -38,6 +38,7 @@ public class ModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         handheldItem(ModItems.RESUPPLY_ORB);
+        handheldItem(ModItems.RESUPPLY_ENTITY_ORB);
     }
 
 
